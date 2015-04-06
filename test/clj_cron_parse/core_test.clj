@@ -27,6 +27,13 @@
        (next-date now "* * * 1,2 * *") => (date 2015 01 02 12 00 00 000)
        (next-date now "* * * * 2,3 *") => (date 2015 02 01 12 00 00 000)
        (next-date now "* * * * * 1,2") => (date 2015 01 05 12 00 00 000)
+       (next-date now "@yearly") => (date 2016 01 01 00 00 00 000)
+       (next-date now "@annually") => (date 2016 01 01 00 00 00 000)
+       (next-date now "@monthly") => (date 2015 02 01 00 00 00 000)
+       (next-date now "@weekly") => (date 2015 01 05 00 00 00 000)
+       (next-date now "@daily") => (date 2015 01 02 00 00 00 000)
+       (next-date now "@midnight") => (date 2015 01 02 00 00 00 000)
+       (next-date now "@hourly") => (date 2015 01 01 13 00 00 000)
        )
 
 ;; close to new year, ranges, L, W, #
