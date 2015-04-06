@@ -4,9 +4,9 @@
             [clj-time.core :as t]))
 
 (defchecker date [& date-args]
-            (checker [actual]
-                     (let [d (apply t/date-time date-args)]
-                       (= d actual))))
+  (checker [actual]
+           (let [d (apply t/date-time date-args)]
+             (= d actual))))
 
 (def now (t/date-time 2015 01 01 12 00 00 000))
 (def nye (t/date-time 2014 12 31 12 00 00 000))
@@ -33,8 +33,7 @@
        (next-date now "@weekly") => (date 2015 01 05 00 00 00 000)
        (next-date now "@daily") => (date 2015 01 02 00 00 00 000)
        (next-date now "@midnight") => (date 2015 01 02 00 00 00 000)
-       (next-date now "@hourly") => (date 2015 01 01 13 00 00 000)
-       )
+       (next-date now "@hourly") => (date 2015 01 01 13 00 00 000))
 
 ;; close to new year, ranges, L, W, #
 
@@ -58,5 +57,4 @@
        (next-date now "* * * * 2,13 *") => nil
        (next-date now "* * * * * 1,8") => nil
        (next-date now "s s") => nil
-       (next-date now "") => nil
-       )
+       (next-date now "") => nil)
