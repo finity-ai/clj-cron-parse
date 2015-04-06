@@ -1,6 +1,6 @@
 (defproject clj-cron-parse "0.1.1-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "A Clojure library for using cron expressions"
+  :url "https://github.com/shmish111/clj-cron-parse"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
