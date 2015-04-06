@@ -10,7 +10,7 @@ you want using cron expressions.
 
 ## Usage
 
-In [Leiningen](http://github.com/technomancy/leiningen/) add the dependency (http://clojars.org/clj-cron-parse/latest-version.svg)](http://clojars.org/clj-cron-parse)
+In [Leiningen](http://github.com/technomancy/leiningen/) add the dependency [![Clojars Project](http://clojars.org/clj-cron-parse/latest-version.svg)](http://clojars.org/clj-cron-parse)
 
 ```clojure
 (require '[clj-cron-parse.core :refer [next-date]])
