@@ -84,6 +84,7 @@
   [s range-fn]
   (cond
     (= s "*") :star
+    (= s "L") :L
     :else (let [x (s/split s #",")]
             (if (empty? x) nil
                 (let [y (->> x
@@ -131,7 +132,14 @@
 
 (defn parse-dom
   [s]
-  (parse-field 1 31 num-or-range s))
+  (let [d (parse-item s num-or-range)]
+    (match d
+           nil nil
+           :star :star
+           :L :L
+           ([{:range _} :as r] :seq) r
+           (xs :guard (partial bound-seq? 1 31)) d
+           :else nil)))
 
 (defn parse-minutes-or-seconds
   [s]
@@ -209,6 +217,9 @@
 (defn now-with-doms
   [now dom]
   (match dom
+         :L (-> now
+                (t/plus (t/months 1))
+                (t/minus (t/days (t/day now))))
     ([& xs] :seq) (if-let [ns (next-val (t/day now) xs)]
                     (t/plus now (t/days (- ns (t/day now))))
                     (t/plus now (t/months 1) (t/days (- (first xs) (t/day now)))))
@@ -300,6 +311,7 @@
       [:star :star] (next-date-by-dom now cron-map)
       [_ :star] (next-date-by-dom now cron-map)
       [:star _] (next-date-by-dow now cron-map)
+      [:L _] (next-date-by-dom now cron-map)
       :else (let [by-dom (next-date-by-dom now cron-map)
                   by-dow (next-date-by-dow now cron-map)]
               (-> [by-dom by-dow] sort first)))

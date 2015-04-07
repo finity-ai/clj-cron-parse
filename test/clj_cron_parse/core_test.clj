@@ -25,8 +25,11 @@
        (next-date now "* 1,2 * * * *") => (date 2015 01 01 12 01 00 000)
        (next-date now "* * 1,2 * * *") => (date 2015 01 02 01 00 00 000)
        (next-date now "* * * 1,2 * *") => (date 2015 01 02 12 00 00 000)
+       (next-date now "* * * L * *") => (date 2015 01 31 12 00 00 000)
        (next-date now "* * * * 2,3 *") => (date 2015 02 01 12 00 00 000)
        (next-date now "* * * * * 1,2") => (date 2015 01 05 12 00 00 000)
+       (next-date now "* * * * * W") => (date 2015 01 02 12 00 00 000)
+       (next-date (t/date-time 2015 01 02 12 00 00 000) "* * * * * W") => (date 2015 01 05 12 00 00 000)
        (next-date now "@yearly") => (date 2016 01 01 00 00 00 000)
        (next-date now "@annually") => (date 2016 01 01 00 00 00 000)
        (next-date now "@monthly") => (date 2015 02 01 00 00 00 000)
@@ -35,7 +38,7 @@
        (next-date now "@midnight") => (date 2015 01 02 00 00 00 000)
        (next-date now "@hourly") => (date 2015 01 01 13 00 00 000))
 
-;; close to new year, ranges, L, W, #
+;; TODO: close to new year, ranges, L for dow, /n
 
 (facts "should return nil for an invalid cron expression"
        (next-date now "x * * * * *") => nil
