@@ -1,7 +1,8 @@
 (ns clj-cron-parse.core
   (:require [clojure.string :as s]
             [clj-time.core :as t]
-            [clojure.core.match :refer [match]]))
+            [clojure.core.match :refer [match]]
+            [clj-time.predicates :as pr]))
 
 (defn int-or-nil
   [s]
@@ -85,6 +86,7 @@
   (cond
     (= s "*") :star
     (= s "L") :L
+    (= s "W") :W
     :else (let [x (s/split s #",")]
             (if (empty? x) nil
                 (let [y (->> x
@@ -134,12 +136,13 @@
   [s]
   (let [d (parse-item s num-or-range)]
     (match d
-           nil nil
-           :star :star
-           :L :L
-           ([{:range _} :as r] :seq) r
-           (xs :guard (partial bound-seq? 1 31)) d
-           :else nil)))
+      nil nil
+      :star :star
+      :L :L
+      :W :W
+      ([{:range _} :as r] :seq) r
+      (xs :guard (partial bound-seq? 1 31)) d
+      :else nil)))
 
 (defn parse-minutes-or-seconds
   [s]
@@ -214,12 +217,20 @@
                     (t/plus now (t/days 1) (t/hours (- (first xs) (t/hour now)))))
     :else now))
 
+(defn next-week-dom
+  [now]
+  (let [tomorrow (t/plus now (t/days 1))]
+    (if (pr/weekday? tomorrow)
+      tomorrow
+      (next-week-dom tomorrow))))
+
 (defn now-with-doms
   [now dom]
   (match dom
-         :L (-> now
-                (t/plus (t/months 1))
-                (t/minus (t/days (t/day now))))
+    :L (-> now
+           (t/plus (t/months 1))
+           (t/minus (t/days (t/day now))))
+    :W (next-week-dom now)
     ([& xs] :seq) (if-let [ns (next-val (t/day now) xs)]
                     (t/plus now (t/days (- ns (t/day now))))
                     (t/plus now (t/months 1) (t/days (- (first xs) (t/day now)))))
@@ -265,7 +276,8 @@
   "takes an org.joda.time.DateTime representing now and a cron expression and returns the next org.joda.time.DateTime to occur for that cron exp.
   If it is not possible to parse the cron expression then nil is returned.
 
-  The cron expressions attempt to follow BSD crontab by Paul Vixie with the addition of seconds in the first position
+  The cron expressions attempt to follow BSD crontab by Paul Vixie with the addition of seconds in the first position and W can be used for both
+  day of month and day of week.
 
          field         allowed values
          -----         --------------
@@ -311,7 +323,6 @@
       [:star :star] (next-date-by-dom now cron-map)
       [_ :star] (next-date-by-dom now cron-map)
       [:star _] (next-date-by-dow now cron-map)
-      [:L _] (next-date-by-dom now cron-map)
       :else (let [by-dom (next-date-by-dom now cron-map)
                   by-dow (next-date-by-dow now cron-map)]
               (-> [by-dom by-dow] sort first)))
