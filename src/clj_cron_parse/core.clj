@@ -79,9 +79,9 @@
         (if y (->> (rest y)
                    (map parse-single-day)
                    ((fn [[a b]] (concat (range a b) [b]))))
-              (if-let [[_ step] (re-find #"^\*/(\d+)$" s)]
-                (range 1 7 (Integer/parseInt step))
-                nil))))))
+            (if-let [[_ step] (re-find #"^\*/(\d+)$" s)]
+              (range 1 7 (Integer/parseInt step))
+              nil))))))
 
 (defn parse-item
   [s range-fn]
