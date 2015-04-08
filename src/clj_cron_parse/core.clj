@@ -70,7 +70,7 @@
     :else (let [n (int-or-nil s)]
             (if (= 0 n) 7 n))))
 
-(defn day-num-or-range
+(defn dow-num-or-range
   [s]
   (let [x (re-find #"^(\d+|\w{3}|L|W|1L|2L|3L|4L|5L)$" s)]
     (if-not (empty? x)
@@ -79,7 +79,9 @@
         (if y (->> (rest y)
                    (map parse-single-day)
                    ((fn [[a b]] (concat (range a b) [b]))))
-            nil)))))
+              (if-let [[_ step] (re-find #"^\*/(\d+)$" s)]
+                (range 1 7 (Integer/parseInt step))
+                nil))))))
 
 (defn parse-item
   [s range-fn]
@@ -106,7 +108,7 @@
     :else (let [x (s/split s #",")]
             (if (empty? x) nil
                 (let [y (->> x
-                             (map day-num-or-range)
+                             (map dow-num-or-range)
                              flatten
                              distinct)]
                   (if (and
@@ -122,13 +124,17 @@
     ([a & bs] :seq) (<= minimum a (last xs) maximum)
     :else false))
 
+(defn next-divisible
+  [x d]
+  (* d (+ 1 (quot x d))))
+
 (defn parse-field
   [minimum maximum range-fn s]
   (let [d (parse-item s range-fn)]
     (match d
       nil nil
       :star :star
-      ([{:range _} :as r] :seq) r
+      ([{:range r}] :seq) (range (next-divisible minimum r) maximum r)
       (xs :guard (partial bound-seq? minimum maximum)) d
       :else nil)))
 
@@ -234,6 +240,7 @@
     ([& xs] :seq) (if-let [ns (next-val (t/day now) xs)]
                     (t/plus now (t/days (- ns (t/day now))))
                     (t/plus now (t/months 1) (t/days (- (first xs) (t/day now)))))
+    {:range x} (t/plus now (t/days 1))
     :else now))
 
 (defn now-with-dows
@@ -308,13 +315,13 @@
 
          string          meaning
          ------          -------
-         @yearly         Run once a year, \"0 0 1 1 *\".
+         @yearly         Run once a year, \"0 0 0 1 1 *\".
          @annually       (same as @yearly)
-         @monthly        Run once a month, \"0 0 1 * *\".
-         @weekly         Run once a week, \"0 0 * * 0\".
-         @daily          Run once a day, \"0 0 * * *\".
+         @monthly        Run once a month, \"0 0 0 1 * *\".
+         @weekly         Run once a week, \"0 0 0 * * 0\".
+         @daily          Run once a day, \"0 0 0 * * *\".
          @midnight       (same as @daily)
-         @hourly         Run once an hour, \"0 * * * *\".
+         @hourly         Run once an hour, \"0 0 * * * *\".
          "
 
   [now cron]
