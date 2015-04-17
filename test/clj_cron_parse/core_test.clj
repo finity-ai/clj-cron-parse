@@ -51,14 +51,14 @@
        (next-date now "* * * * * 1-5") => (date 2015 01 02 12 00 00 000)
        (next-date now "* * * * * W") => (date 2015 01 02 12 00 00 000)
        (next-date now "* * * * * */2") => (date 2015 01 02 12 00 00 000)
-       ;(next-date now "* * * * * 3-4/2") => (date 2015 01 02 12 00 00 000)
-       ;(next-date now "* * * * * 1L") => (date 2015 01 02 12 00 00 000)
-       ;(next-date now "* * * * * 2L") => (date 2015 01 02 12 00 00 000)
-       ;(next-date now "* * * * * 3L") => (date 2015 01 02 12 00 00 000)
-       ;(next-date now "* * * * * 4L") => (date 2015 01 02 12 00 00 000)
-       ;(next-date now "* * * * * 5L") => (date 2015 01 02 12 00 00 000)
-       ;(next-date now "* * * * * 6L") => (date 2015 01 02 12 00 00 000)
-       ;(next-date now "* * * * * 7L") => (date 2015 01 02 12 00 00 000)
+       ;(next-date now "* * * * * 1-5/2") => (bit of an edge case I think)
+       (next-date now "* * * * * 1L") => (date 2015 01 26 12 00 00 000)
+       (next-date now "* * * * * 2L") => (date 2015 01 27 12 00 00 000)
+       (next-date now "* * * * * 3L") => (date 2015 01 28 12 00 00 000)
+       (next-date now "* * * * * 4L") => (date 2015 01 29 12 00 00 000)
+       (next-date now "* * * * * 5L") => (date 2015 01 30 12 00 00 000)
+       (next-date now "* * * * * 6L") => (date 2015 01 31 12 00 00 000)
+       (next-date now "* * * * * 7L") => (date 2015 01 25 12 00 00 000)
        (next-date (t/date-time 2015 01 02 12 00 00 000) "* * * * * 1-5") => (date 2015 01 05 12 00 00 000)
        (next-date (t/date-time 2015 01 02 12 00 00 000) "* * * * * W") => (date 2015 01 05 12 00 00 000)
        (next-date now "@yearly") => (date 2016 01 01 00 00 00 000)
@@ -69,7 +69,7 @@
        (next-date now "@midnight") => (date 2015 01 02 00 00 00 000)
        (next-date now "@hourly") => (date 2015 01 01 13 00 00 000))
 
-;; TODO: close to new year, combinations, L for dow, range/n for dow
+;; TODO: close to new year, combinations, range/n for dow
 
 (facts "should return nil for an invalid cron expression"
        (next-date now "x * * * * *") => nil
@@ -81,6 +81,7 @@
        (next-date now "L * * * * *") => nil
        (next-date now "* L * * * *") => nil
        (next-date now "* * L * * *") => nil
+       (next-date now "* * * 1L * *") => nil
        (next-date now "* * * * L *") => nil
        (next-date now "* * * * * L") => nil
        (next-date now "W * * * * *") => nil
@@ -105,5 +106,6 @@
        (next-date now "* * * 1-32 * *") => nil
        (next-date now "* * * * 2-13 *") => nil
        (next-date now "* * * * * 1-8") => nil
+       (next-date now "* * * * * 8L") => nil
        (next-date now "s s") => nil
        (next-date now "") => nil)

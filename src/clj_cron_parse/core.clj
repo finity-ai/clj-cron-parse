@@ -62,26 +62,28 @@
     (= "SAT" s) 6
     (= "SUN" s) 7
     (= "W" s) [1 2 3 4 5]
-    (= "1L" s) :L1
-    (= "2L" s) :L2
-    (= "3L" s) :L3
-    (= "4L" s) :L4
-    (= "5L" s) :L5
+    (= "1L" s) :1L
+    (= "2L" s) :2L
+    (= "3L" s) :3L
+    (= "4L" s) :4L
+    (= "5L" s) :5L
+    (= "6L" s) :6L
+    (= "7L" s) :7L
     :else (let [n (int-or-nil s)]
             (if (= 0 n) 7 n))))
 
 (defn dow-num-or-range
   [s]
-  (let [x (re-find #"^(\d+|\w{3}|L|W|1L|2L|3L|4L|5L)$" s)]
+  (let [x (re-find #"^(\d+|\w{3}|L|W|1L|2L|3L|4L|5L|6L|7L)$" s)]
     (if-not (empty? x)
       (parse-single-day (second x))
       (let [y (re-find #"^(\d+|\w{3})-(\d+|\w{3})$" s)]
         (if y (->> (rest y)
                    (map parse-single-day)
                    ((fn [[a b]] (concat (range a b) [b]))))
-            (if-let [[_ step] (re-find #"^\*/(\d+)$" s)]
-              (range 1 7 (Integer/parseInt step))
-              nil))))))
+              (if-let [[_ step] (re-find #"^\*/(\d+)$" s)]
+                (range 1 7 (Integer/parseInt step))
+                nil))))))
 
 (defn parse-item
   [s range-fn]
@@ -91,15 +93,15 @@
     (= s "W") :W
     :else (let [x (s/split s #",")]
             (if (empty? x) nil
-                (let [y (->> x
-                             (map range-fn)
-                             flatten
-                             distinct)]
-                  (if (and
-                       (every? identity y)
-                       (not (empty? y)))
-                    (sort y)
-                    nil))))))
+                           (let [y (->> x
+                                        (map range-fn)
+                                        flatten
+                                        distinct)]
+                             (if (and
+                                   (every? identity y)
+                                   (not (empty? y)))
+                               (sort y)
+                               nil))))))
 
 (defn parse-dow-item
   [s]
@@ -107,22 +109,23 @@
     (= s "*") :star
     :else (let [x (s/split s #",")]
             (if (empty? x) nil
-                (let [y (->> x
-                             (map dow-num-or-range)
-                             flatten
-                             distinct)]
-                  (if (and
-                       (every? identity y)
-                       (not (empty? y)))
-                    {:keywords (filter keyword? y)
-                     :numbers  (sort (filter number? y))}
-                    nil))))))
+                           (let [y (->> x
+                                        (map dow-num-or-range)
+                                        flatten
+                                        distinct)]
+                             (if (and
+                                   (every? identity y)
+                                   (not (empty? y)))
+                               {:keywords (filter keyword? y)
+                                :numbers  (sort (filter number? y))}
+                               nil))))))
 
 (defn bound-seq?
   [minimum maximum xs]
-  (match xs
-    ([a & bs] :seq) (<= minimum a (last xs) maximum)
-    :else false))
+  (and (coll? xs)
+       (not-empty xs)
+       (every? number? xs)
+       (<= minimum (first xs) (last xs) maximum)))
 
 (defn next-divisible
   [x d]
@@ -132,23 +135,23 @@
   [minimum maximum range-fn s]
   (let [d (parse-item s range-fn)]
     (match d
-      nil nil
-      :star :star
-      ([{:range r}] :seq) (range (next-divisible minimum r) maximum r)
-      (xs :guard (partial bound-seq? minimum maximum)) d
-      :else nil)))
+           nil nil
+           :star :star
+           ([{:range r}] :seq) (range (next-divisible minimum r) maximum r)
+           (xs :guard (partial bound-seq? minimum maximum)) d
+           :else nil)))
 
 (defn parse-dom
   [s]
   (let [d (parse-item s num-or-range)]
     (match d
-      nil nil
-      :star :star
-      :L :L
-      :W :W
-      ([{:range _} :as r] :seq) r
-      (xs :guard (partial bound-seq? 1 31)) d
-      :else nil)))
+           nil nil
+           :star :star
+           :L :L
+           :W :W
+           ([{:range _} :as r] :seq) r
+           (xs :guard (partial bound-seq? 1 31)) d
+           :else nil)))
 
 (defn parse-minutes-or-seconds
   [s]
@@ -166,32 +169,34 @@
   [s]
   (let [d (parse-dow-item s)]
     (match d
-      nil nil
-      :star :star
-      {:numbers  (xs :guard (partial bound-seq? 1 7))
-       :keywords _} d
-      :else nil)))
+           nil nil
+           :star :star
+           {:numbers  (xs :guard (partial bound-seq? 1 7))
+            :keywords _} d
+           {:numbers _
+            :keywords (xs :guard #(not (empty? %)))} d
+           :else nil)))
 
 (defn make-cron-map
   [cron]
   (match (s/split cron #" ")
-    [sec minute hour dom month dow] (let [cron-map {:dow    (parse-dow dow)
-                                                    :month  (parse-month month)
-                                                    :dom    (parse-dom dom)
-                                                    :hour   (parse-hours hour)
-                                                    :minute (parse-minutes-or-seconds minute)
-                                                    :sec    (parse-minutes-or-seconds sec)}]
-                                      (if (every? identity (vals cron-map))
-                                        cron-map
-                                        nil))
-    ["@yearly"] {:dow :star :month [1] :dom [1] :hour [0] :minute [0] :sec [0]}
-    ["@annually"] {:dow :star :month [1] :dom [1] :hour [0] :minute [0] :sec [0]}
-    ["@monthly"] {:dow :star :month :star :dom [1] :hour [0] :minute [0] :sec [0]}
-    ["@weekly"] {:dow {:numbers [1] :keywords nil} :month :star :dom :star :hour [0] :minute [0] :sec [0]}
-    ["@daily"] {:dow :star :month :star :dom :star :hour [0] :minute [0] :sec [0]}
-    ["@midnight"] {:dow :star :month :star :dom :star :hour [0] :minute [0] :sec [0]}
-    ["@hourly"] {:dow :star :month :star :dom :star :hour :star :minute [0] :sec [0]}
-    :else nil))
+         [sec minute hour dom month dow] (let [cron-map {:dow    (parse-dow dow)
+                                                         :month  (parse-month month)
+                                                         :dom    (parse-dom dom)
+                                                         :hour   (parse-hours hour)
+                                                         :minute (parse-minutes-or-seconds minute)
+                                                         :sec    (parse-minutes-or-seconds sec)}]
+                                           (if (every? identity (vals cron-map))
+                                             cron-map
+                                             nil))
+         ["@yearly"] {:dow :star :month [1] :dom [1] :hour [0] :minute [0] :sec [0]}
+         ["@annually"] {:dow :star :month [1] :dom [1] :hour [0] :minute [0] :sec [0]}
+         ["@monthly"] {:dow :star :month :star :dom [1] :hour [0] :minute [0] :sec [0]}
+         ["@weekly"] {:dow {:numbers [1] :keywords nil} :month :star :dom :star :hour [0] :minute [0] :sec [0]}
+         ["@daily"] {:dow :star :month :star :dom :star :hour [0] :minute [0] :sec [0]}
+         ["@midnight"] {:dow :star :month :star :dom :star :hour [0] :minute [0] :sec [0]}
+         ["@hourly"] {:dow :star :month :star :dom :star :hour :star :minute [0] :sec [0]}
+         :else nil))
 
 (defn next-val
   [now as]
@@ -202,26 +207,26 @@
 (defn now-with-seconds
   [now sec]
   (match sec
-    ([& xs] :seq) (if-let [ns (next-val (t/second now) xs)]
-                    (t/plus now (t/seconds (- ns (t/second now))))
-                    (t/plus now (t/minutes 1) (t/seconds (- (first xs) (t/second now)))))
-    :else now))
+         ([& xs] :seq) (if-let [ns (next-val (t/second now) xs)]
+                         (t/plus now (t/seconds (- ns (t/second now))))
+                         (t/plus now (t/minutes 1) (t/seconds (- (first xs) (t/second now)))))
+         :else now))
 
 (defn now-with-minutes
   [now minute]
   (match minute
-    ([& xs] :seq) (if-let [ns (next-val (t/minute now) xs)]
-                    (t/plus now (t/minutes (- ns (t/minute now))))
-                    (t/plus now (t/hours 1) (t/minutes (- (first xs) (t/minute now)))))
-    :else now))
+         ([& xs] :seq) (if-let [ns (next-val (t/minute now) xs)]
+                         (t/plus now (t/minutes (- ns (t/minute now))))
+                         (t/plus now (t/hours 1) (t/minutes (- (first xs) (t/minute now)))))
+         :else now))
 
 (defn now-with-hours
   [now hour]
   (match hour
-    ([& xs] :seq) (if-let [ns (next-val (t/hour now) xs)]
-                    (t/plus now (t/hours (- ns (t/hour now))))
-                    (t/plus now (t/days 1) (t/hours (- (first xs) (t/hour now)))))
-    :else now))
+         ([& xs] :seq) (if-let [ns (next-val (t/hour now) xs)]
+                         (t/plus now (t/hours (- ns (t/hour now))))
+                         (t/plus now (t/days 1) (t/hours (- (first xs) (t/hour now)))))
+         :else now))
 
 (defn next-week-dom
   [now]
@@ -233,33 +238,63 @@
 (defn now-with-doms
   [now dom]
   (match dom
-    :L (-> now
-           (t/plus (t/months 1))
-           (t/minus (t/days (t/day now))))
-    :W (next-week-dom now)
-    ([& xs] :seq) (if-let [ns (next-val (t/day now) xs)]
-                    (t/plus now (t/days (- ns (t/day now))))
-                    (t/plus now (t/months 1) (t/days (- (first xs) (t/day now)))))
-    {:range x} (t/plus now (t/days 1))
-    :else now))
+         :L (-> now
+                (t/plus (t/months 1))
+                (t/minus (t/days (t/day now))))
+         :W (next-week-dom now)
+         ([& xs] :seq) (if-let [ns (next-val (t/day now) xs)]
+                         (t/plus now (t/days (- ns (t/day now))))
+                         (t/plus now (t/months 1) (t/days (- (first xs) (t/day now)))))
+         {:range x} (t/plus now (t/days 1))
+         :else now))
+
+(defn- last-dow-of-month**
+  [now d]
+  (let [day-of-week (t/day-of-week (t/last-day-of-the-month now))
+        diff (- day-of-week d)
+        diff2 (if (neg? diff)
+                (- (+ 7 day-of-week) d)
+                diff)]
+    (t/minus (t/last-day-of-the-month now) (t/days diff2))))
+
+(defn last-dow-of-month*
+  [now d]
+  (match d
+         :1L (last-dow-of-month** now 1)
+         :2L (last-dow-of-month** now 2)
+         :3L (last-dow-of-month** now 3)
+         :4L (last-dow-of-month** now 4)
+         :5L (last-dow-of-month** now 5)
+         :6L (last-dow-of-month** now 6)
+         :7L (last-dow-of-month** now 7)
+         :else nil))
+
+(defn last-dow-of-month
+  [now ds]
+  (->> ds
+       (map (partial last-dow-of-month* now))
+       sort
+       first))
 
 (defn now-with-dows
   [now dow]
   (match dow
-    :star now
-    {:numbers  (xs :guard (partial bound-seq? 1 7))
-     :keywords _} (if-let [ns (next-val (t/day-of-week now) xs)]
-                    (t/plus now (t/days (- ns (t/day-of-week now))))
-                    (t/plus now (t/days (- 7 (t/day-of-week now) (* -1 (first xs))))))
-    :else now))
+         :star now
+         {:numbers  (xs :guard (partial bound-seq? 1 7))
+          :keywords _} (if-let [ns (next-val (t/day-of-week now) xs)]
+                         (t/plus now (t/days (- ns (t/day-of-week now))))
+                         (t/plus now (t/days (- 7 (t/day-of-week now) (* -1 (first xs))))))
+         {:numbers _
+          :keywords (xs :guard #(not (empty? %)))} (last-dow-of-month now xs)
+         :else now))
 
 (defn now-with-months
   [now month]
   (match month
-    ([& xs] :seq) (if-let [ns (next-val (t/month now) xs)]
-                    (t/plus now (t/months (- ns (t/month now))))
-                    (t/plus now (t/years 1) (t/months (- (first xs) (t/month now)))))
-    :else now))
+         ([& xs] :seq) (if-let [ns (next-val (t/month now) xs)]
+                         (t/plus now (t/months (- ns (t/month now))))
+                         (t/plus now (t/years 1) (t/months (- (first xs) (t/month now)))))
+         :else now))
 
 (defn next-date-by-dom
   [now {:keys [sec minute hour dom month]}]
@@ -327,10 +362,10 @@
   [now cron]
   (if-let [{:keys [dom dow] :as cron-map} (make-cron-map cron)]
     (match [dom dow]
-      [:star :star] (next-date-by-dom now cron-map)
-      [_ :star] (next-date-by-dom now cron-map)
-      [:star _] (next-date-by-dow now cron-map)
-      :else (let [by-dom (next-date-by-dom now cron-map)
-                  by-dow (next-date-by-dow now cron-map)]
-              (-> [by-dom by-dow] sort first)))
+           [:star :star] (next-date-by-dom now cron-map)
+           [_ :star] (next-date-by-dom now cron-map)
+           [:star _] (next-date-by-dow now cron-map)
+           :else (let [by-dom (next-date-by-dom now cron-map)
+                       by-dow (next-date-by-dow now cron-map)]
+                   (-> [by-dom by-dow] sort first)))
     nil))
