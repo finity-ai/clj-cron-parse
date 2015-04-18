@@ -135,7 +135,7 @@
 (defn parse-field
   [minimum maximum range-fn s]
   (let [d (parse-item s range-fn)]
-    (match d
+    (match (parse-item s range-fn)
       nil nil
       :star :star
       ([{:range r}] :seq) (range (next-divisible minimum r) maximum r)
@@ -154,18 +154,6 @@
       (xs :guard (partial bound-seq? 1 31)) d
       :else nil)))
 
-(defn parse-minutes-or-seconds
-  [s]
-  (parse-field 0 59 num-or-range s))
-
-(defn parse-hours
-  [s]
-  (parse-field 0 23 num-or-range s))
-
-(defn parse-month
-  [s]
-  (parse-field 1 12 month-num-or-range s))
-
 (defn parse-dow
   [s]
   (let [d (parse-dow-item s)]
@@ -180,11 +168,11 @@
   [cron]
   (match (s/split cron #" ")
     [sec minute hour dom month dow] (let [cron-map {:dow    (parse-dow dow)
-                                                    :month  (parse-month month)
+                                                    :month  (parse-field 1 12 month-num-or-range month)
                                                     :dom    (parse-dom dom)
-                                                    :hour   (parse-hours hour)
-                                                    :minute (parse-minutes-or-seconds minute)
-                                                    :sec    (parse-minutes-or-seconds sec)}]
+                                                    :hour   (parse-field 0 23 num-or-range hour)
+                                                    :minute (parse-field 0 59 num-or-range minute)
+                                                    :sec    (parse-field 0 59 num-or-range sec)}]
                                       (if (every? identity (vals cron-map))
                                         cron-map
                                         nil))
