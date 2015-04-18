@@ -42,6 +42,9 @@
        (next-date now "* * * L * *") => (date 2015 01 31 12 00 00 000)
        (next-date now "* * * W * *") => (date 2015 01 02 12 00 00 000)
        (next-date (t/date-time 2015 01 02 12 00 00 000) "* * * W * *") => (date 2015 01 05 12 00 00 000)
+       (next-date now "* * * * FEB *") => (date 2015 02 01 12 00 00 000)
+       (next-date now "* * * * feb *") => (date 2015 02 01 12 00 00 000)
+       (next-date now "* * * * 2 *") => (date 2015 02 01 12 00 00 000)
        (next-date now "* * * * 2,3 *") => (date 2015 02 01 12 00 00 000)
        (next-date now "* * * * */2 *") => (date 2015 02 01 12 00 00 000)
        (next-date now "* * * * 2-11 *") => (date 2015 02 01 12 00 00 000)
@@ -50,15 +53,19 @@
        (next-date now "* * * * * 1,2") => (date 2015 01 05 12 00 00 000)
        (next-date now "* * * * * 1-5") => (date 2015 01 02 12 00 00 000)
        (next-date now "* * * * * W") => (date 2015 01 02 12 00 00 000)
+       (next-date now "* * * * * MON") => (date 2015 01 05 12 00 00 000)
+       (next-date now "* * * * * mon") => (date 2015 01 05 12 00 00 000)
        (next-date now "* * * * * */2") => (date 2015 01 02 12 00 00 000)
        ;(next-date now "* * * * * 1-5/2") => (bit of an edge case I think)
        (next-date now "* * * * * 1L") => (date 2015 01 26 12 00 00 000)
+       (next-date now "* * * * * 1L,2L") => (date 2015 01 26 12 00 00 000)
        (next-date now "* * * * * 2L") => (date 2015 01 27 12 00 00 000)
        (next-date now "* * * * * 3L") => (date 2015 01 28 12 00 00 000)
        (next-date now "* * * * * 4L") => (date 2015 01 29 12 00 00 000)
        (next-date now "* * * * * 5L") => (date 2015 01 30 12 00 00 000)
        (next-date now "* * * * * 6L") => (date 2015 01 31 12 00 00 000)
        (next-date now "* * * * * 7L") => (date 2015 01 25 12 00 00 000)
+       (next-date now "* * * * * 6L,7L") => (date 2015 01 25 12 00 00 000)
        (next-date (t/date-time 2015 01 02 12 00 00 000) "* * * * * 1-5") => (date 2015 01 05 12 00 00 000)
        (next-date (t/date-time 2015 01 02 12 00 00 000) "* * * * * W") => (date 2015 01 05 12 00 00 000)
        (next-date now "@yearly") => (date 2016 01 01 00 00 00 000)
@@ -107,5 +114,7 @@
        (next-date now "* * * * 2-13 *") => nil
        (next-date now "* * * * * 1-8") => nil
        (next-date now "* * * * * 8L") => nil
+       (next-date now "* * * * febx *") => nil
+       (next-date now "* * * * * MONx") => nil
        (next-date now "s s") => nil
        (next-date now "") => nil)
