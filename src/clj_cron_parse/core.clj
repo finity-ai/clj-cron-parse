@@ -188,13 +188,13 @@
 (defn next-val
   [now as]
   (->> as
-       (filter #(> % now))
+       (filter #(>= % now))
        first))
 
 (defn now-with-seconds
   [now sec]
   (match sec
-    ([& xs] :seq) (if-let [ns (next-val (t/second now) xs)]
+    ([& xs] :seq) (if-let [ns (next-val (t/second (t/plus now (t/seconds 1))) xs)]
                     (t/plus now (t/seconds (- ns (t/second now))))
                     (t/plus now (t/minutes 1) (t/seconds (- (first xs) (t/second now)))))
     :else now))
@@ -285,7 +285,7 @@
       (now-with-months month)))
 
 (defn next-date-by-dow
-  [now {:keys [sec minute hour dow month]}]
+  [now {:keys [sec minute hour dow month] :as e}]
   (-> now
       (now-with-seconds sec)
       (now-with-minutes minute)
