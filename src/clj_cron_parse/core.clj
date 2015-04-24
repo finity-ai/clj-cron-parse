@@ -347,15 +347,15 @@
          "
 
   ([now cron]
-  (if-let [{:keys [dom dow] :as cron-map} (make-cron-map cron)]
-    (match [dom dow]
-      [:star :star] (next-date-by-dom now cron-map)
-      [_ :star] (next-date-by-dom now cron-map)
-      [:star _] (next-date-by-dow now cron-map)
-      :else (let [by-dom (next-date-by-dom now cron-map)
-                  by-dow (next-date-by-dow now cron-map)]
-              (-> [by-dom by-dow] sort first)))
-    nil))
+   (if-let [{:keys [dom dow] :as cron-map} (make-cron-map cron)]
+     (match [dom dow]
+       [:star :star] (next-date-by-dom now cron-map)
+       [_ :star] (next-date-by-dom now cron-map)
+       [:star _] (next-date-by-dow now cron-map)
+       :else (let [by-dom (next-date-by-dom now cron-map)
+                   by-dow (next-date-by-dow now cron-map)]
+               (-> [by-dom by-dow] sort first)))
+     nil))
   ([now cron timezone]
    (if timezone
      (let [tz-now (t/to-time-zone now (t/time-zone-for-id timezone))]

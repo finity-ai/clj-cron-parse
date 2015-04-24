@@ -1,4 +1,4 @@
-(defproject clj-cron-parse "0.1.4-SNAPSHOT"
+(defproject clj-cron-parse "0.1.4"
   :description "A Clojure library for using cron expressions"
   :url "https://github.com/shmish111/clj-cron-parse"
   :license {:name "Eclipse Public License"
