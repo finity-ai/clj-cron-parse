@@ -120,3 +120,10 @@
        (next-date now "* * * * * MONx") => nil
        (next-date now "s s") => nil
        (next-date now "") => nil)
+
+(facts "should provide next date calculated within a timezone"
+       (next-date now "1 0 12 * * *" nil) => (date 2015 01 01 12 00 01 000)
+       (next-date now "1 0 12 * * *" "UTC") => (date 2015 01 01 12 00 01 000)
+       (next-date now "1 0 12 * * *" "Asia/Seoul") => (date 2015 01 02 03 00 01 000)
+       (next-date (t/date-time 2015 01 01 12 00 02) "1 0 12 * * *" "America/Sao_Paulo") => (date 2015 01 01 14 00 01 000)
+       (next-date (t/date-time 2015 01 01 12 00 02) "1 * * * * *" "America/Sao_Paulo") => (t/date-time 2015 01 01 12 01 01))

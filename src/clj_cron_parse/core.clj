@@ -300,6 +300,10 @@
   If you provide the value of now as a DateTime in a timezone, it will return the cron calculated within that timezone.
   To view the value in UTC simply convert it to the UTC timezone.
 
+  Alternatively you can provide a timezone id such as \"Asia/Seoul\" (defaults to \"UTC\") as the final argument and you
+  will get back the next date in UTC time for the cron expression calculated in that timezone.  For example, you want the next UTC
+  date for every day at midday in Seoul (next-date now \"0 0 12 * * *\" \"Asia/Seoul\").
+
   The cron expressions attempt to follow BSD crontab by Paul Vixie with the addition of seconds in the first position and W can be used for both
   day of month and day of week.
 
@@ -342,7 +346,7 @@
          @hourly         Run once an hour, \"0 0 * * * *\".
          "
 
-  [now cron]
+  ([now cron]
   (if-let [{:keys [dom dow] :as cron-map} (make-cron-map cron)]
     (match [dom dow]
       [:star :star] (next-date-by-dom now cron-map)
@@ -352,3 +356,8 @@
                   by-dow (next-date-by-dow now cron-map)]
               (-> [by-dom by-dow] sort first)))
     nil))
+  ([now cron timezone]
+   (if timezone
+     (let [tz-now (t/to-time-zone now (t/time-zone-for-id timezone))]
+       (t/to-time-zone (next-date tz-now cron) (t/time-zone-for-id "UTC")))
+     (next-date now cron))))
