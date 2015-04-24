@@ -294,8 +294,11 @@
       (now-with-months month)))
 
 (defn next-date
-  "takes an org.joda.time.DateTime representing now and a cron expression and returns the next org.joda.time.DateTime (UTC) to occur for that cron exp.
+  "takes an org.joda.time.DateTime representing now and a cron expression and returns the next org.joda.time.DateTime to occur for that cron exp.
   If it is not possible to parse the cron expression then nil is returned.
+
+  If you provide the value of now as a DateTime in a timezone, it will return the cron calculated within that timezone.
+  To view the value in UTC simply convert it to the UTC timezone.
 
   The cron expressions attempt to follow BSD crontab by Paul Vixie with the addition of seconds in the first position and W can be used for both
   day of month and day of week.
