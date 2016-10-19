@@ -1,7 +1,5 @@
 (ns clj-cron-parse.core
-  (:require
-   [clojure.tools.trace :as trace]
-   [clojure.string :as s]
+  (:require [clojure.string :as s]
             [clj-time.core :as t]
             [clojure.core.match :refer [match]]
             [clj-time.predicates :as pr]))
@@ -193,24 +191,24 @@
        (filter #(>= % now))
        first))
 
-(trace/deftrace next-date-time
+(defn next-date-time
   [now as]
   (->> as
-       (filter #(or (=  % now)
+       (filter #(or (t/equal? % now)
                     (t/after? % now)))
        first))
 
-(trace/deftrace now-with-seconds
+(defn now-with-seconds
   [now sec]
   (match sec
-         ([& xs] :seq)
-         (let [this-minute (apply t/date-time ((juxt t/year t/month t/day t/hour t/minute) now))
-               ns (next-date-time (t/plus now (t/seconds 1))
-                                 (map #(t/plus this-minute (t/seconds %)) xs))]
-           (if ns
-             ns
-             (t/plus now (t/minutes 1) (t/seconds (- (first xs) (t/second now))))))
-         :else now))
+    ([& xs] :seq)
+    (let [this-minute (t/to-time-zone (t/floor now t/minute) (.getZone now))
+          ns (next-date-time (t/plus now (t/seconds 1))
+                             (map #(t/plus this-minute (t/seconds %)) xs))]
+      (if ns
+        ns
+        (t/plus now (t/minutes 1) (t/seconds (- (first xs) (t/second now))))))
+    :else now))
 
 (defn now-with-minutes
   [now minute]
@@ -362,12 +360,12 @@
   ([now cron]
    (if-let [{:keys [dom dow] :as cron-map} (make-cron-map cron)]
      (match [dom dow]
-            [:star :star] (next-date-by-dom now cron-map)
-            [_ :star] (next-date-by-dom now cron-map)
-            [:star _] (next-date-by-dow now cron-map)
-            :else (let [by-dom (next-date-by-dom now cron-map)
-                        by-dow (next-date-by-dow now cron-map)]
-                    (-> [by-dom by-dow] sort first)))
+       [:star :star] (next-date-by-dom now cron-map)
+       [_ :star] (next-date-by-dom now cron-map)
+       [:star _] (next-date-by-dow now cron-map)
+       :else (let [by-dom (next-date-by-dom now cron-map)
+                   by-dow (next-date-by-dow now cron-map)]
+               (-> [by-dom by-dow] sort first)))
      nil))
   ([now cron timezone]
    (if timezone
