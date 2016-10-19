@@ -204,7 +204,7 @@
     ([& xs] :seq)
     (let [this-minute (t/to-time-zone (t/floor now t/minute) (.getZone now))]
       (or (next-date-time (t/plus now (t/seconds 1))
-                             (map #(t/plus this-minute (t/seconds %)) xs))
+                          (map #(t/plus this-minute (t/seconds %)) xs))
           (t/plus now (t/minutes 1) (t/seconds (- (first xs) (t/second now))))))
     :else now))
 
