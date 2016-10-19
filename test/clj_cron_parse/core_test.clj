@@ -9,10 +9,12 @@
              (= d actual))))
 
 (def now (t/date-time 2015 01 01 12 00 00 000))
+(def now2 (t/date-time 2015 01 01 12 00 59 000))
 (def nye (t/date-time 2014 12 31 12 00 00 000))
 
 (time (facts "should find next date for cron expression"
              (next-date now "1 * * * * *") => (date 2015 01 01 12 00 01 000)
+             (next-date now2 "0 * * * * *") => (date 2015 01 01 12 01 00 000)
              (next-date now "* 1 * * * *") => (date 2015 01 01 12 01 00 000)
              (next-date now "* * 13 * * *") => (date 2015 01 01 13 00 00 000)
              (next-date now "* * * 10 * *") => (date 2015 01 10 12 00 00 000)
