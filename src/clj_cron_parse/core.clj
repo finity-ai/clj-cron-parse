@@ -191,12 +191,21 @@
        (filter #(>= % now))
        first))
 
+(defn next-date-time
+  [now as]
+  (->> as
+       (filter #(or (t/equal? % now)
+                    (t/after? % now)))
+       first))
+
 (defn now-with-seconds
   [now sec]
   (match sec
-    ([& xs] :seq) (if-let [ns (next-val (t/second (t/plus now (t/seconds 1))) xs)]
-                    (t/plus now (t/seconds (- ns (t/second now))))
-                    (t/plus now (t/minutes 1) (t/seconds (- (first xs) (t/second now)))))
+    ([& xs] :seq)
+    (let [this-minute (t/to-time-zone (t/floor now t/minute) (.getZone now))]
+      (or (next-date-time (t/plus now (t/seconds 1))
+                          (map #(t/plus this-minute (t/seconds %)) xs))
+          (t/plus now (t/minutes 1) (t/seconds (- (first xs) (t/second now))))))
     :else now))
 
 (defn now-with-minutes
