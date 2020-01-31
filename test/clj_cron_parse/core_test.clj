@@ -76,7 +76,10 @@
              (next-date now "@midnight") => (date 2015 01 02 00 00 00 000)
              (next-date now "@hourly") => (date 2015 01 01 13 00 00 000)
              (next-date (t/date-time 2015 04 22 06 22 29 000) "30 22 6 * * 3") => (date 2015 04 22 06 22 30 000)
-             (next-date (t/date-time 2015 04 21 06 22 30 000) "30 22 6 * * 3") => (date 2015 04 22 06 22 30 000)))
+             (next-date (t/date-time 2015 04 21 06 22 30 000) "30 22 6 * * 3") => (date 2015 04 22 06 22 30 000)
+             (next-date (t/date-time 2020 01 29 00 00 00 000) "0 0 0 1 * *") => (date 2020 02 01 00 00 00 000)
+             (next-date (t/date-time 2020 01 30 00 00 00 000) "0 0 0 1 * *") => (date 2020 02 01 00 00 00 000)
+             (next-date (t/date-time 2020 01 31 00 00 00 000) "0 0 0 1 * *") => (date 2020 02 01 00 00 00 000)))
 
 ;; TODO: close to new year, combinations, range/n for dow
 

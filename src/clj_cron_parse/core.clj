@@ -231,7 +231,9 @@
     :W (next-week-dom now)
     ([& xs] :seq) (if-let [ns (next-val (t/day now) xs)]
                     (t/plus now (t/days (- ns (t/day now))))
-                    (t/plus now (t/months 1) (t/days (- (first xs) (t/day now)))))
+                    (t/plus (t/minus now (t/days (- (t/day now) 1)))
+                            (t/months 1)
+                            (t/days (- (first xs) 1))))
     {:range x} (t/plus now (t/days 1))
     :else now))
 
