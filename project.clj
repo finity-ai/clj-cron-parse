@@ -8,9 +8,9 @@
   :pedantic? :warn
   :deploy-repositories {"releases" {:url "https://repo.clojars.org"}}
 
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [clj-time "0.9.0"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
+                 [clj-time "0.15.0"]
                  [org.clojure/core.match "0.3.0-alpha4"]]
-  :profiles {:dev {:dependencies [[midje "1.6.3"]]
+  :profiles {:dev {:dependencies [[midje "1.9.9"]]
                    :plugins [[lein-cljfmt "0.1.10"]
-                             [lein-midje "3.1.3"]]}})
+                             [lein-midje "3.2.1"]]}})
