@@ -13,6 +13,7 @@
 
 (time (facts "should find next date for cron expression"
              (next-date now "1 * * * * *") => (date 2015 01 01 12 00 01 000)
+             (next-date (t/date-time 2022 05 24 10 59 00) "0 */5 * * * *") => (t/date-time 2022 05 24 11 00 00)
              (next-date now "* 1 * * * *") => (date 2015 01 01 12 01 00 000)
              (next-date now "* * 13 * * *") => (date 2015 01 01 13 00 00 000)
              (next-date now "* * * 10 * *") => (date 2015 01 10 12 00 00 000)
@@ -27,7 +28,7 @@
              (next-date now "1-20/2 * * * * *") => (date 2015 01 01 12 00 01 000)
              (next-date (t/date-time 2015 01 01 12 00 04 000) "3-20/2 * * * * *") => (date 2015 01 01 12 00 05 000)
              (next-date now "* 1,2 * * * *") => (date 2015 01 01 12 01 00 000)
-             (next-date now "* */2 * * * *") => (date 2015 01 01 12 02 00 000)
+             (next-date now "* */2 * * * *") => (date 2015 01 01 12 00 00 000)
              (next-date now "* 1-20 * * * *") => (date 2015 01 01 12 01 00 000)
              (next-date now "* 1-20/2 * * * *") => (date 2015 01 01 12 01 00 000)
              (next-date (t/date-time 2015 01 01 12 05 00 000) "* 1-20/3 * * * *") => (date 2015 01 01 12 07 00 000)

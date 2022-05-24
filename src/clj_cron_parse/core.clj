@@ -130,7 +130,9 @@
 
 (defn next-divisible
   [x d]
-  (* d (+ 1 (quot x d))))
+  (if (= x 0)
+    0
+    (* d (+ 1 (quot x d)))))
 
 (defn parse-field
   [minimum maximum range-fn s]
@@ -356,6 +358,7 @@
                    by-dow (next-date-by-dow now cron-map)]
                (-> [by-dom by-dow] sort first)))
      nil))
+
   ([now cron timezone]
    (if timezone
      (let [tz-now (t/to-time-zone now (t/time-zone-for-id timezone))]
