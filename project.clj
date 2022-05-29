@@ -1,4 +1,4 @@
-(defproject ai.finity/clj-cron-parse "0.1.5-SNAPSHOT"
+(defproject clj-cron-parse "0.1.5-SNAPSHOT"
   :description "A Clojure library for using cron expressions"
   :url "https://github.com/finity-ai/clj-cron-parse"
   :license {:name "Eclipse Public License"
