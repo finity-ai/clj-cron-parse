@@ -101,7 +101,7 @@
                              distinct)]
                   (if (and
                        (every? identity y)
-                       (not (empty? y)))
+                       (seq y))
                     (sort y)
                     nil))))))
 
@@ -117,7 +117,7 @@
                              distinct)]
                   (if (and
                        (every? identity y)
-                       (not (empty? y)))
+                       (seq y))
                     (sort y)
                     nil))))))
 
@@ -163,7 +163,7 @@
       nil nil
       :star :star
       (xs :guard (partial bound-seq? 1 7)) d
-      (xs :guard #(not (empty? %))) d
+      (xs :guard #(seq %)) d
       :else nil)))
 
 (defn make-cron-map
@@ -266,7 +266,7 @@
     (xs :guard (partial bound-seq? 1 7)) (if-let [ns (next-val (t/day-of-week now) xs)]
                                            (t/plus now (t/days (- ns (t/day-of-week now))))
                                            (t/plus now (t/days (- 7 (t/day-of-week now) (* -1 (first xs))))))
-    (xs :guard #(not (empty? %))) (last-dow-of-month now xs)
+    (xs :guard #(seq %)) (last-dow-of-month now xs)
     :else now))
 
 (defn now-with-months
