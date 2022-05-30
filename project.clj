@@ -16,4 +16,4 @@
                   ["vcs" "commit"]
                   ["vcs" "tag" "--no-sign"]
                   ["deploy"]]
-  :deploy-repositories {"releases" {:url "https://repo.clojars.org" :creds :gpg}})
+  :deploy-repositories {"releases" {:url "https://repo.clojars.org" :creds :gpg :sign-releases false}})
