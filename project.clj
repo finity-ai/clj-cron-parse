@@ -15,4 +15,5 @@
                    "leiningen.release/bump-version" "release"]
                   ["vcs" "commit"]
                   ["vcs" "tag" "--no-sign"]
-                  ["deploy"]])
+                  ["deploy"]]
+  :deploy-repositories {"releases" {:url "https://repo.clojars.org" :creds :gpg}})
