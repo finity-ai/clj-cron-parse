@@ -9,4 +9,10 @@
   :pedantic? :abort
   :profiles {:dev {:dependencies [[midje "1.10.5"]]
                    :plugins [[lein-cljfmt "0.8.0"]
-                             [lein-midje "3.2.2"]]}})
+                             [lein-midje "3.2.2"]]}}
+  :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version"
+                   "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag" "--no-sign"]
+                  ["deploy"]])
